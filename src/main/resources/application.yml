@@ -1,7 +1,6 @@
 aws:
     region: eu-central-1
-    user:
-        profile: default
+    role_arn: arn:aws:iam::469694857107:role/TrafficGuardStreamConsumer
 kinesis:
     video:
         stream:
@@ -9,5 +8,10 @@ kinesis:
             name: traffic-guard
 film:
     watcher:
-        save_nth_frame: 20
+        save_nth_frame: 50
         bucket_name: traffic-guard-frames
+        folder: source_images
+        monitor:
+            render: true
+            width:  640
+            height: 480

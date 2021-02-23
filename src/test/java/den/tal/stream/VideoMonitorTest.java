@@ -4,7 +4,6 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.kinesisvideo.parser.ebml.InputStreamParserByteSource;
 import com.amazonaws.kinesisvideo.parser.ebml.MkvTypeInfos;
-import com.amazonaws.kinesisvideo.parser.examples.KinesisVideoExample;
 import com.amazonaws.kinesisvideo.parser.examples.KinesisVideoFrameViewer;
 import com.amazonaws.kinesisvideo.parser.mkv.*;
 import com.amazonaws.kinesisvideo.parser.mkv.visitors.CompositeMkvElementVisitor;
@@ -15,12 +14,7 @@ import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoClientBuilder;
 import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoMedia;
 import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoMediaClientBuilder;
 import com.amazonaws.services.kinesisvideo.model.*;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -63,8 +57,8 @@ public class VideoMonitorTest {
                 .withCredentials(credentials);
 
         amazonKinesisVideoMedia = builder.build();
-//        H264FrameRenderer frameRenderer = H264FrameRenderer.create(new KinesisVideoFrameViewer(width, height));
-        TollerantFrameRenderer frameRenderer = new TollerantFrameRenderer(new KinesisVideoFrameViewer(width, height));
+        H264FrameRenderer frameRenderer = H264FrameRenderer.create(new KinesisVideoFrameViewer(width, height));
+//        TollerantFrameRenderer frameRenderer = new TollerantFrameRenderer(new KinesisVideoFrameViewer(width, height));
         FragmentMetadataVisitor fragmentMetadataVisitor = FragmentMetadataVisitor.create();
         //A visitor used to log as the GetMedia stream is processed.
         LogVisitor logVisitor = new LogVisitor(fragmentMetadataVisitor);
