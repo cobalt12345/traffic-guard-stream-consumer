@@ -1,0 +1,13 @@
+aws:
+    region: eu-central-1
+    user:
+        profile: default
+kinesis:
+    video:
+        stream:
+            content_type: video/h264
+            name: traffic-guard
+film:
+    watcher:
+        save_nth_frame: 20
+        bucket_name: traffic-guard-frames
