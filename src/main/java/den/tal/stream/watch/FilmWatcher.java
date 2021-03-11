@@ -113,7 +113,7 @@ public class FilmWatcher {
             log.error("Can't get media from stream {}.", videoStreamName);
             log.error("", t);
 
-            throw t;
+//            throw t;
 
         } finally {
             log.info("Finishing getting media from stream {}.", videoStreamName);

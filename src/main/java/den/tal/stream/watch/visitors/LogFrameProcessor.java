@@ -13,7 +13,9 @@ import java.util.Optional;
 public class LogFrameProcessor implements FrameVisitor.FrameProcessor {
 
     @Override
-    public void process(Frame frame, MkvTrackMetadata trackMetadata, Optional<FragmentMetadata> fragmentMetadata) throws FrameProcessException {
+    public void process(Frame frame, MkvTrackMetadata trackMetadata, Optional<FragmentMetadata> fragmentMetadata)
+            throws FrameProcessException {
+
         log.debug("Frame: {} Track metadata: {} Fragment metadata: {} ", frame, trackMetadata,
                 fragmentMetadata.orElse(null));
     }
