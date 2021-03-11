@@ -2,15 +2,17 @@ package den.tal.stream;
 
 import den.tal.stream.watch.FilmWatcher;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Iterator;
 
+@SpringBootApplication()
 @Log4j2
 public class StreamConsumerStart {
 
     public static void main(String[] args) {
-        var applicationContext = new AnnotationConfigApplicationContext(StreamConsumerConfig.class);
+        var applicationContext = SpringApplication.run(StreamConsumerStart.class, args);
 
         if (log.isDebugEnabled()) {
             for (Iterator<String> namesIter = applicationContext.getBeanFactory().getBeanNamesIterator();

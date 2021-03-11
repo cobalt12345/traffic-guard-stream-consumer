@@ -12,20 +12,15 @@ import com.amazonaws.services.kinesisvideo.model.GetDataEndpointRequest;
 import den.tal.stream.watch.exceptions.FilmWatcherInitException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
 
 
 @Log4j2
 @Configuration
 @ComponentScan()
-public abstract class StreamConsumerConfig {
+public class StreamConsumerConfig {
 
     @Autowired
     private AppConfig appConfig;
@@ -37,16 +32,6 @@ public abstract class StreamConsumerConfig {
                         .withRoleSessionName("traffic-guard-session");
 
         return new STSProfileCredentialsServiceProvider(roleInfo);
-    }
-
-    @Bean
-    public PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-        yaml.setResources(new ClassPathResource("application.yml"));
-        placeholderConfigurer.setProperties(yaml.getObject());
-
-        return placeholderConfigurer;
     }
 
     @Bean

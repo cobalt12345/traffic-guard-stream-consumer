@@ -8,10 +8,10 @@ kinesis:
             name: traffic-guard
 film:
     watcher:
-        save_nth_frame: 50
+        save_nth_frame: 10
         bucket_name: traffic-guard-frames
         folder: source_images
         monitor:
-            render: true
+            render: false
             width:  640
             height: 480

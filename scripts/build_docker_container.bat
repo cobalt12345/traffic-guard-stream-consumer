@@ -1,0 +1,1 @@
+docker build -t traffic-guard-stream-consumer:v0.1 ../.

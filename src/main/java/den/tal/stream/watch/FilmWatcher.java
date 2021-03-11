@@ -29,7 +29,6 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class FilmWatcher {
 
-
     @Value("${kinesis.video.stream.name}")
     private String videoStreamName;
 
