@@ -9,7 +9,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import den.tal.stream.watch.exceptions.FilmWatcherInitException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Log4j2
+@Slf4j
 public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
 
     private int processNthFrame;

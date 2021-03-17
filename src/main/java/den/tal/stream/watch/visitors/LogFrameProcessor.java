@@ -5,11 +5,11 @@ import com.amazonaws.kinesisvideo.parser.mkv.FrameProcessException;
 import com.amazonaws.kinesisvideo.parser.utilities.FragmentMetadata;
 import com.amazonaws.kinesisvideo.parser.utilities.FrameVisitor;
 import com.amazonaws.kinesisvideo.parser.utilities.MkvTrackMetadata;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
-@Log4j2
+@Slf4j
 public class LogFrameProcessor implements FrameVisitor.FrameProcessor {
 
     @Override

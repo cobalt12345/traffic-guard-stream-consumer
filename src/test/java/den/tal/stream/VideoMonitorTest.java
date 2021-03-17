@@ -14,7 +14,7 @@ import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoClientBuilder;
 import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoMedia;
 import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoMediaClientBuilder;
 import com.amazonaws.services.kinesisvideo.model.*;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 import static com.amazonaws.kinesisvideo.parser.utilities.BufferedImageUtil.addTextToImage;
 
-@Log4j2
+@Slf4j
 //@RunWith(SpringRunner.class)
 //@SpringJUnitConfig(StreamConsumerConfig.class)
 public class VideoMonitorTest {
@@ -128,7 +128,7 @@ public class VideoMonitorTest {
     }
 }
 
-@Log4j2
+@Slf4j
 class TollerantFrameRenderer extends H264FrameRenderer {
     private static final int PIXEL_TO_LEFT = 10;
     private static final int PIXEL_TO_TOP_LINE_1 = 20;

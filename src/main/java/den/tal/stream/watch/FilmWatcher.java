@@ -14,7 +14,7 @@ import com.amazonaws.services.kinesisvideo.model.*;
 import den.tal.stream.watch.exceptions.FilmWatcherInitException;
 import den.tal.stream.watch.processors.FilmFrameProcessor;
 import den.tal.stream.watch.visitors.LogFrameProcessor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,9 +23,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Log4j2
+@Slf4j
 @Component
 public class FilmWatcher {
 
@@ -37,6 +38,9 @@ public class FilmWatcher {
 
     @Value("${film.watcher.save_nth_frame}")
     private int watchAnyNthFrame;
+
+    @Value("${film.watcher.wait.retry.read}")
+    private int waitAndRetryInSeconds;
 
     @Value("${film.watcher.bucket_name}")
     private String bucketName;
@@ -99,21 +103,35 @@ public class FilmWatcher {
 
     private void run() {
         try {
-            log.debug("Get media from stream {}.", videoStreamName);
-            GetMediaResult result =  amazonKinesisVideoMedia.getMedia(new GetMediaRequest()
-                    .withStreamName(videoStreamName).withStartSelector(startSelector));
+            final long millis = TimeUnit.SECONDS.toMillis(waitAndRetryInSeconds);
+            while (true) {
+                log.debug("Get media from stream {}.", videoStreamName);
+                GetMediaResult result = amazonKinesisVideoMedia.getMedia(new GetMediaRequest()
+                        .withStreamName(videoStreamName).withStartSelector(startSelector));
 
-            StreamingMkvReader streamingMkvReader = StreamingMkvReader.createDefault(
-                    new InputStreamParserByteSource(result.getPayload()));
+                StreamingMkvReader streamingMkvReader = StreamingMkvReader.createDefault(
+                        new InputStreamParserByteSource(result.getPayload()));
 
-            streamingMkvReader.apply(compositeVisitor);
+                if (streamingMkvReader.mightHaveNext()) {
+                    streamingMkvReader.apply(compositeVisitor);
+                } else {
+                    try {
+                        log.debug("Nothing to read from stream {}. Sleep for {} seconds.", videoStreamName,
+                                waitAndRetryInSeconds);
+
+                        Thread.currentThread().sleep(millis);
+                    } catch (InterruptedException iex) {
+                        log.warn("", iex);
+                    }
+                }
+            }
         } catch (MkvElementVisitException meve) {
             log.error("Visitor exception {} for stream {}.", meve, videoStreamName);
-        } catch (Throwable t) {
+        } catch (RuntimeException ret) {
             log.error("Can't get media from stream {}.", videoStreamName);
-            log.error("", t);
+            log.error("", ret);
 
-//            throw t;
+            throw ret;
 
         } finally {
             log.info("Finishing getting media from stream {}.", videoStreamName);

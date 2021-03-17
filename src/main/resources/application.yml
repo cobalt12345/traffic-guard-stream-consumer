@@ -12,6 +12,9 @@ film:
         bucket_name: traffic-guard-frames
         folder: source_images
         monitor:
-            render: false
+            render: true #-Djava.awt.headless=false - add this parameter if renderer = true
             width:  640
             height: 480
+        wait:
+            retry:
+                read: 30 #seconds

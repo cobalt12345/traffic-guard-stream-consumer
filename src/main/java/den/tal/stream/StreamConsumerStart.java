@@ -1,14 +1,14 @@
 package den.tal.stream;
 
 import den.tal.stream.watch.FilmWatcher;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Iterator;
 
 @SpringBootApplication()
-@Log4j2
+@Slf4j
 public class StreamConsumerStart {
 
     public static void main(String[] args) {
