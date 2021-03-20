@@ -1,5 +1,7 @@
 package den.tal.stream;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.profile.internal.securitytoken.RoleInfo;
 import com.amazonaws.auth.profile.internal.securitytoken.STSProfileCredentialsServiceProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 
 @Slf4j
@@ -25,8 +28,9 @@ public class StreamConsumerConfig {
     @Autowired
     private AppConfig appConfig;
 
+    @Profile("deploy_locally")
     @Bean
-    public STSProfileCredentialsServiceProvider stsCredentialsProvider() {
+    public AWSCredentialsProvider stsCredentialsProvider() {
         RoleInfo roleInfo =
                 new RoleInfo().withRoleArn(appConfig.getTrafficGuardRoleArn())
                         .withRoleSessionName("traffic-guard-session");
@@ -34,17 +38,24 @@ public class StreamConsumerConfig {
         return new STSProfileCredentialsServiceProvider(roleInfo);
     }
 
+    @Profile("deploy_to_ecs")
     @Bean
-    public AmazonKinesisVideo kinesisVideo(STSProfileCredentialsServiceProvider stsCredentialsProvider) {
+    public AWSCredentialsProvider containerCredentialsProvider() {
+
+        return new EC2ContainerCredentialsProviderWrapper();
+    }
+
+    @Bean
+    public AmazonKinesisVideo kinesisVideo(AWSCredentialsProvider awsCredentialsProvider) {
         AmazonKinesisVideoClientBuilder videoClientBuilder = AmazonKinesisVideoClientBuilder.standard();
         AmazonKinesisVideo amazonKinesisVideo = videoClientBuilder.withRegion(appConfig.getRegion())
-                .withCredentials(stsCredentialsProvider).build();
+                .withCredentials(awsCredentialsProvider).build();
 
         return amazonKinesisVideo;
     }
 
     @Bean
-    public AmazonKinesisVideoMedia kinesisVideoMedia(STSProfileCredentialsServiceProvider stsCredentialsProvider,
+    public AmazonKinesisVideoMedia kinesisVideoMedia(AWSCredentialsProvider awsCredentialsProvider,
                                                      AmazonKinesisVideo kinesisVideo) throws FilmWatcherInitException {
 
         String endpoint = kinesisVideo.getDataEndpoint(new GetDataEndpointRequest()
@@ -62,7 +73,7 @@ public class StreamConsumerConfig {
 
         amazonKinesisVideoMediaClientBuilder.withEndpointConfiguration(
                 new AwsClientBuilder.EndpointConfiguration(endpoint, appConfig.getRegion()))
-                    .withCredentials(stsCredentialsProvider);
+                    .withCredentials(awsCredentialsProvider);
 
         return amazonKinesisVideoMediaClientBuilder.build();
     }

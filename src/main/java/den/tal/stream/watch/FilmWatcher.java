@@ -102,6 +102,7 @@ public class FilmWatcher {
     }
 
     private void run() {
+        int status = 0;
         try {
             final long millis = TimeUnit.SECONDS.toMillis(waitAndRetryInSeconds);
             while (true) {
@@ -126,6 +127,7 @@ public class FilmWatcher {
                 }
             }
         } catch (MkvElementVisitException meve) {
+            status = 1;
             log.error("Visitor exception {} for stream {}.", meve, videoStreamName);
         } catch (RuntimeException ret) {
             log.error("Can't get media from stream {}.", videoStreamName);
@@ -135,6 +137,7 @@ public class FilmWatcher {
 
         } finally {
             log.info("Finishing getting media from stream {}.", videoStreamName);
+            System.exit(status);
         }
     }
 

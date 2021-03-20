@@ -27,6 +27,27 @@
         <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>deploy_locally</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>deploy_locally</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>deploy_to_ecs</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>deploy_to_ecs</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -89,6 +110,9 @@
                     <mainClass>den.tal.stream.StreamConsumerStart</mainClass>
                     <layout>ZIP</layout>
                     <fork>false</fork>
+                    <profiles>
+                        <profile>deploy_locally</profile>
+                    </profiles>
                 </configuration>
             </plugin>
             <plugin>
