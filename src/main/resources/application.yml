@@ -17,4 +17,4 @@ film:
             height: 480
         wait:
             retry:
-                read: 80 #seconds
+                read: 30 #seconds

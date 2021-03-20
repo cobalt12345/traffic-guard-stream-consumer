@@ -1,3 +1,4 @@
+rem Following statements are from the AWS Console for ECS.
 cd .. && ^
 aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 469694857107.dkr.ecr.eu-central-1.amazonaws.com && ^
 docker build -t traffic-guard-ecr-repo . && ^
