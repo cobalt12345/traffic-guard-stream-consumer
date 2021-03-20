@@ -54,8 +54,6 @@ public class StreamConsumerConfig {
         return new AwsClientBuilder.EndpointConfiguration(appConfig.getKinesisServiceEndpoint(), appConfig.getRegion());
     }
 
-
-
     @ConditionalOnProperty(prefix = "s3.service", value = "endpoint")
     public AwsClientBuilder.EndpointConfiguration s3EndpointConfiguration() {
 
