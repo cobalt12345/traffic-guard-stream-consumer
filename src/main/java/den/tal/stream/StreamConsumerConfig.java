@@ -14,6 +14,8 @@ import com.amazonaws.services.kinesisvideo.model.GetDataEndpointRequest;
 import den.tal.stream.watch.exceptions.FilmWatcherInitException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -45,11 +47,38 @@ public class StreamConsumerConfig {
         return new EC2ContainerCredentialsProviderWrapper();
     }
 
+    @ConditionalOnProperty(prefix = "kinesis.service", value = "endpoint")
     @Bean
-    public AmazonKinesisVideo kinesisVideo(AWSCredentialsProvider awsCredentialsProvider) {
+    public AwsClientBuilder.EndpointConfiguration kinesisEndpointConfiguration() {
+
+        return new AwsClientBuilder.EndpointConfiguration(appConfig.getKinesisServiceEndpoint(), appConfig.getRegion());
+    }
+
+
+
+    @ConditionalOnProperty(prefix = "s3.service", value = "endpoint")
+    public AwsClientBuilder.EndpointConfiguration s3EndpointConfiguration() {
+
+        return new AwsClientBuilder.EndpointConfiguration(appConfig.getS3ServiceEndpoint(), appConfig.getRegion());
+    }
+
+    @Bean
+    public AmazonKinesisVideo kinesisVideo(AWSCredentialsProvider awsCredentialsProvider,
+                                           @Qualifier("kinesisEndpointConfiguration")
+                                           @Autowired(required = false)
+                                                   AwsClientBuilder.EndpointConfiguration  endpointConfiguration) {
+
         AmazonKinesisVideoClientBuilder videoClientBuilder = AmazonKinesisVideoClientBuilder.standard();
-        AmazonKinesisVideo amazonKinesisVideo = videoClientBuilder.withRegion(appConfig.getRegion())
-                .withCredentials(awsCredentialsProvider).build();
+
+        if (null != endpointConfiguration) {
+            log.info("Use pre-defined Kinesis endpoint: {}", endpointConfiguration.getServiceEndpoint());
+            videoClientBuilder = videoClientBuilder.withEndpointConfiguration(endpointConfiguration);
+        } else {
+            log.info("Use default Kinesis endpoint.");
+            videoClientBuilder = videoClientBuilder.withRegion(appConfig.getRegion());
+        }
+        videoClientBuilder = videoClientBuilder.withCredentials(awsCredentialsProvider);
+        AmazonKinesisVideo amazonKinesisVideo  = videoClientBuilder.build();
 
         return amazonKinesisVideo;
     }

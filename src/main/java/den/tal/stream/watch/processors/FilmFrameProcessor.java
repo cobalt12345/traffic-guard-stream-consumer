@@ -1,6 +1,7 @@
 package den.tal.stream.watch.processors;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.kinesisvideo.parser.mkv.Frame;
 import com.amazonaws.kinesisvideo.parser.mkv.FrameProcessException;
 import com.amazonaws.kinesisvideo.parser.utilities.*;
@@ -33,7 +34,8 @@ public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
     private ReentrantLock lock;
 
     public FilmFrameProcessor(int analyzeEachNFrame, String bucketName, String folder, Regions region,
-                              AWSCredentialsProvider credentialsProvider, ReentrantLock lock)
+                              AWSCredentialsProvider credentialsProvider, ReentrantLock lock,
+                              AwsClientBuilder.EndpointConfiguration s3EndpointConfiguration)
                                     throws FilmWatcherInitException {
 
         processNthFrame = analyzeEachNFrame;
@@ -42,7 +44,17 @@ public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
         this.lock = lock;
 
         try {
-            s3 = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(credentialsProvider).build();
+            var s3ClientBuilder = AmazonS3ClientBuilder.standard();
+
+            if (null != s3EndpointConfiguration) {
+                log.info("Use pre-defined S3 endpoint: {}", s3EndpointConfiguration.getServiceEndpoint());
+                s3ClientBuilder = s3ClientBuilder.withEndpointConfiguration(s3EndpointConfiguration);
+            } else {
+                log.info("Use default S3 endpoint.");
+                s3ClientBuilder = s3ClientBuilder.withRegion(region).withCredentials(credentialsProvider);
+            }
+
+            s3 = s3ClientBuilder.build();
 
         } catch (Exception ex) {
             log.error("Processor can not be created!", ex);

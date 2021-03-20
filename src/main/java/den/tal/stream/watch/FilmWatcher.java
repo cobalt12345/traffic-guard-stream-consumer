@@ -1,6 +1,7 @@
 package den.tal.stream.watch;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.kinesisvideo.parser.ebml.InputStreamParserByteSource;
 import com.amazonaws.kinesisvideo.parser.examples.KinesisVideoFrameViewer;
 import com.amazonaws.kinesisvideo.parser.mkv.MkvElementVisitException;
@@ -16,6 +17,7 @@ import den.tal.stream.watch.processors.FilmFrameProcessor;
 import den.tal.stream.watch.visitors.LogFrameProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -71,11 +73,16 @@ public class FilmWatcher {
 
     final private ReentrantLock lock = new ReentrantLock();
 
+    @Qualifier("s3EndpointConfiguration")
+    @Autowired(required = false)
+    private AwsClientBuilder.EndpointConfiguration s3EndpointConfiguration;
+
+
     @PostConstruct
     private void initWatcher() throws FilmWatcherInitException {
         lock.lock();
         FilmFrameProcessor frameToS3Persister = new FilmFrameProcessor(watchAnyNthFrame, bucketName, folder,
-                Regions.fromName(region), credentialsProvider, lock);
+                Regions.fromName(region), credentialsProvider, lock, s3EndpointConfiguration);
 
         FrameVisitor frameVisitor = FrameVisitor.create(frameToS3Persister);
         var logFrame = new LogFrameProcessor();
