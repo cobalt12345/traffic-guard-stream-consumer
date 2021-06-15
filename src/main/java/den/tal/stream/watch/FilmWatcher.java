@@ -7,11 +7,15 @@ import com.amazonaws.kinesisvideo.parser.examples.KinesisVideoFrameViewer;
 import com.amazonaws.kinesisvideo.parser.mkv.MkvElementVisitException;
 import com.amazonaws.kinesisvideo.parser.mkv.StreamingMkvReader;
 import com.amazonaws.kinesisvideo.parser.mkv.visitors.CompositeMkvElementVisitor;
+import com.amazonaws.kinesisvideo.parser.utilities.FragmentMetadataVisitor;
 import com.amazonaws.kinesisvideo.parser.utilities.FrameVisitor;
 import com.amazonaws.kinesisvideo.parser.utilities.H264FrameRenderer;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.kinesisvideo.AmazonKinesisVideoMedia;
-import com.amazonaws.services.kinesisvideo.model.*;
+import com.amazonaws.services.kinesisvideo.model.GetMediaRequest;
+import com.amazonaws.services.kinesisvideo.model.GetMediaResult;
+import com.amazonaws.services.kinesisvideo.model.StartSelector;
+import com.amazonaws.services.kinesisvideo.model.StartSelectorType;
 import den.tal.stream.watch.exceptions.FilmWatcherInitException;
 import den.tal.stream.watch.processors.FilmFrameProcessor;
 import den.tal.stream.watch.visitors.LogFrameProcessor;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +89,9 @@ public class FilmWatcher {
         FilmFrameProcessor frameToS3Persister = new FilmFrameProcessor(watchAnyNthFrame, bucketName, folder,
                 Regions.fromName(region), credentialsProvider, lock, s3EndpointConfiguration);
 
-        FrameVisitor frameVisitor = FrameVisitor.create(frameToS3Persister);
+        FrameVisitor frameVisitor = FrameVisitor.create(frameToS3Persister, Optional.of(
+                new FragmentMetadataVisitor.BasicMkvTagProcessor()));
+
         var logFrame = new LogFrameProcessor();
         if (renderStream) {
             log.debug("Render stream...");

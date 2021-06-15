@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -64,8 +65,11 @@ public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
     }
 
     @Override
-    public void process(Frame frame, MkvTrackMetadata trackMetadata, Optional<FragmentMetadata> fragmentMetadata)
+    public void process(Frame frame, MkvTrackMetadata trackMetadata, Optional<FragmentMetadata> fragmentMetadata,
+                        Optional<FragmentMetadataVisitor.MkvTagProcessor> tagProcessor,
+                        Optional<BigInteger> timescale, Optional<BigInteger> fragmentTimecode)
             throws FrameProcessException {
+
         lock.lock();
         try {
             log.debug("Process frame #{}", frameCounter);
@@ -73,12 +77,26 @@ public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
                 log.debug("Save frame #{} to bucket {}", frameCounter, bucketName);
                 try (var os = new ByteArrayOutputStream()) {
                     BufferedImage image = frameDecoder.decodeH264Frame(frame, trackMetadata);
+                    Optional<MkvTag> locationTag = Optional.empty();
+                    if (tagProcessor.isPresent()) {
+                        final FragmentMetadataVisitor.BasicMkvTagProcessor processor =
+                            (FragmentMetadataVisitor.BasicMkvTagProcessor) tagProcessor.get();
+
+                        locationTag = processor.getTags().stream().filter(
+                                mkvTag -> "LOCATION".equals(mkvTag.getTagName())).findFirst();
+
+                    } else {
+                        log.debug("No MkvTag processor present.");
+                    }
                     ImageIO.write(image, "jpeg", os);
                     byte[] imageBytes = os.toByteArray();
                     var is = new ByteArrayInputStream(imageBytes);
                     var objectMetadata = new ObjectMetadata();
                     objectMetadata.setContentType("image/jpeg");
                     objectMetadata.setContentLength(imageBytes.length);
+                    if (locationTag.isPresent()) {
+                        objectMetadata.addUserMetadata("location", locationTag.get().getTagValue());
+                    }
                     s3.putObject(bucketName, folder + "/" + UUID.randomUUID() + ".jpg", is, objectMetadata);
                 } catch (Exception ex) {
                     final var msg = "Could not save frame to S3!";
