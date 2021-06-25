@@ -85,6 +85,7 @@ public class FilmFrameProcessor implements FrameVisitor.FrameProcessor {
                         locationTag = processor.getTags().stream().filter(
                                 mkvTag -> "LOCATION".equals(mkvTag.getTagName())).findFirst();
 
+                        log.debug("Location tag: {}", locationTag);
                     } else {
                         log.debug("No MkvTag processor present.");
                     }
