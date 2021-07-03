@@ -13,8 +13,8 @@ film:
         folder: source_images
         monitor:
             render: false #-Djava.awt.headless=false - add this parameter if renderer = true
-            width:  640
-            height: 480
+            width:  1280
+            height: 720
         wait:
             retry:
                 read: 30 #seconds
