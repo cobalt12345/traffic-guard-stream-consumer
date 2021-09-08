@@ -1,6 +1,6 @@
 aws:
     region: eu-central-1
-    role_arn: arn:aws:iam::469694857107:role/TrafficGuardStreamConsumer
+    role_arn: arn:aws:iam::785668202743:role/TrafficGuardStreamConsumer
 kinesis:
     video:
         stream:
